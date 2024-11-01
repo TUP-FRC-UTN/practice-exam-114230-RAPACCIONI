@@ -1,0 +1,40 @@
+<div class="m-5">
+    <div class="d-flex justify-content-between mt-3">
+        <h1>Orders</h1>
+        <button class="btn btn-primary">Create New Order</button>
+    </div>
+    <div class="border border-2 rounded p-3 mt-3">
+        <!-- Input para filtrar las órdenes -->
+        <div class="mt-3 mb-3">
+            <input 
+            type="text" 
+            class="form-control" 
+            placeholder="Buscar por nombre o email" 
+            [(ngModel)]="searchTerm" />
+        </div>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">Codigo de orden</th>
+                    <th scope="col">Cliente</th>
+                    <th scope="col">Email</th>
+                    <th scope="col">Producto</th>
+                    <th scope="col">Fecha de compra</th>
+                    <th scope="col">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for(order of filteredOrders(); track $index){
+                <tr>
+                    <td>{{ order.orderCode }}</td>
+                    <td>{{ order.customerName }}</td>
+                    <td>{{ order.email }}</td>
+                    <td>{{ getTotalItems(order) + " items" }}</td>
+                    <td>{{ order.timestamp | date: 'shortDate' }}</td>
+                    <td>{{ order.total }}</td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
