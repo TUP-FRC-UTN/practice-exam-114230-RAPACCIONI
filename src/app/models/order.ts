@@ -1,11 +1,11 @@
 import { Product } from "./product";
 
-export class Order {
+export interface Order {
     id?: number;
-    customerName: string = '';
-    email: string = '';
-    products: Product[] = [];
-    total: number = 0;
-    orderCode: string = '';
-    timestamp: Date | undefined;
+    customerName: string;
+    email: string;
+    products: Product[];
+    total: number;
+    orderCode?: string;
+    timestamp?: string
 }

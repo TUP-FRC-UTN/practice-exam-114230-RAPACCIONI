@@ -1,106 +1,150 @@
 <div class="container mt-4">
-    <h2>Create New Order</h2>
-    
-    <form [formGroup]="orderForm" (ngSubmit)="onSubmit()">
-      <div class="row mb-4">
-        <!-- Customer Info -->
-        <div class="col-md-6">
-          <div class="form-group">
-            <label for="nombre">Nombre:</label>
-            <input 
-              type="text" 
-              class="form-control" 
-              id="nombre" 
-              formControlName="nombre"
-              placeholder="Federico">
-          </div>
-        </div>
-        
-        <div class="col-md-6">
-          <div class="form-group">
-            <label for="email">Email:</label>
-            <input 
-              type="email" 
-              class="form-control" 
-              id="email" 
-              formControlName="email"
-              placeholder="fede@gmail.com">
-          </div>
+  <h2>Create New Order</h2>
+
+  <form [formGroup]="orderForm" (ngSubmit)="onSubmit()">
+    <div class="row mb-4">
+      <!-- Customer Info -->
+      <div class="col-md-6">
+        <div class="form-group">
+          <label for="customerName">Nombre:</label>
+          <input type="text" class="form-control" id="customerName" formControlName="customerName" [ngClass]="{
+            'is-invalid': orderForm.get('customerName')?.invalid && 
+            orderForm.get('customerName')?.touched
+          }">
+          @if(orderForm.get('customerName')?.errors?.['required']){
+          <div class="text-danger">El nombre es requerido.</div>
+          }
+          @if(orderForm.get('customerName')?.errors?.['minlength']){
+          <div class="text-danger">El nombre debe tener al menos 3 caracteres.</div>
+          }
         </div>
       </div>
 
-      <!-- Products Section -->
-      <div class="card mb-4">
-        <div class="card-header d-flex justify-content-between align-items-center">
-          <h5 class="mb-0">Productos</h5>
-          <button type="button" class="btn btn-primary btn-sm" (click)="addProduct()">+</button>
+      <div class="col-md-6">
+        <div class="form-group">
+          <label for="email">Email:</label>
+          <input type="email" class="form-control" id="email" formControlName="email" [ngClass]="{
+            'is-invalid': orderForm.get('email')?.invalid && 
+            orderForm.get('email')?.touched
+          }">
+          @if(orderForm.get('email')?.errors?.['required']){
+          <div class="text-danger">El email es requerido.</div>
+          }
+          @if(orderForm.get('email')?.errors?.['email']){
+          <div class="text-danger">El formato de email es incorrecto.</div>
+          }
+          @if(orderForm.get('email')?.errors?.['errorPedido']){
+          <div class="text-danger">Has excedido el limite de 3 pedidos en las ultimas 24 horas.</div>
+          }
         </div>
-        
-        <div class="card-body">
-          <div formArrayName="productos">
-            <div *ngFor="let product of productosFormArray.controls; let i=index" [formGroupName]="i"
-                 class="row mb-3">
-              <div class="col-md-3">
-                <select class="form-select" formControlName="producto">
-                  <option value="">Seleccionar producto</option>
-                  <option *ngFor="let prod of availableProducts" [value]="prod.name">
-                    {{prod.name}}
-                  </option>
-                </select>
-              </div>
-              
-              <div class="col-md-2">
-                <input type="number" class="form-control" formControlName="cantidad" placeholder="Cantidad">
-              </div>
-              
-              <div class="col-md-3">
-                <input type="number" class="form-control" formControlName="precio" placeholder="Precio">
-              </div>
-              
-              <div class="col-md-3">
-                <input type="number" class="form-control" formControlName="stock" placeholder="Stock" readonly>
-              </div>
-              
-              <div class="col-md-1">
-                <button type="button" class="btn btn-danger btn-sm" (click)="removeProduct(i)">X</button>
-              </div>
+      </div>
+    </div>
+
+    <!-- Products Section -->
+    <div class="card mb-4">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Productos</h5>
+        <button type="button" class="btn btn-primary btn-sm" (click)="addProduct()">+</button>
+      </div>
+
+
+      <div class="card-body">
+        <div formArrayName="products">
+          @for(product of productsFromArray.controls; track $index) {
+          <div class="row mb-3" [formGroupName]="$index">
+
+            <!-- selector de producto -->
+            <div class="col-md-3">
+              <label for="" class="form-label">Prodcuto</label>
+              <select name="" id="" class="form-select" formControlName="productId">
+                <option value="">Seleccione un producto</option>
+                @for(p of products; track p.id) {
+                <option [value]="p.id"> {{ p.name }} </option>
+                }
+              </select>
+            </div>
+
+            <!-- campo cantidad -->
+            <div class="col-md-2">
+              <label class="form-label">Cantidad</label>
+              <input type="number" class="form-control" formControlName="quantity">
+              @if(product.get('quantity')?.getError('max')){
+              <div class="text-danger">La cantidad no puede superar el stock.</div>
+              }
+              @if(product.get('quantity')?.getError('min')){
+              <div class="text-danger">La cantidad debe ser mayor que 1</div>
+              }
+              @if(product.get('quantity')?.getError('required')){
+              <div class="text-danger">La cantidad es requerida</div>
+              }
+            </div>
+
+            <!-- campo precio (readonly) -->
+            <div class="col-md-2">
+              <label class="form-label">Precio</label>
+              <input type="number" class="form-control" formControlName="price" readonly>
+            </div>
+
+            <!-- campo stock (readonly) -->
+            <div class="col-md-2">
+              <label class="form-label">Stock</label>
+              <input type="number" class="form-control" formControlName="stock" readonly>
+            </div>
+
+            <!-- boton eliminar -->
+            <div class="col-md-1 d-flex align-items-end">
+              <button type="button" class="btn btn-danger" (click)="removeProduct($index)">
+                x
+              </button>
             </div>
           </div>
+          }
+          @if(orderForm.hasError('duplicateProduct', 'products')){
+          <div class="text-danger">El producto ya ha sido seleccionado</div>
+          }
         </div>
       </div>
+    </div>
 
-      <!-- Selected Products Summary -->
-      <div class="card mb-4">
-        <div class="card-header">
-          <h5 class="mb-0">Productos Seleccionados</h5>
-        </div>
-        <div class="card-body">
-          <ul class="list-unstyled">
-            <li *ngFor="let product of productosFormArray.controls">
-              {{product.get('producto').value}} - Cantidad: {{product.get('cantidad').value}} - 
-              Precio: ${{product.get('precio').value}} - Stock: {{product.get('stock').value}}
-            </li>
-          </ul>
-        </div>
+    <!-- Selected Products Summary -->
+    <div class="card mb-4">
+      <div class="card-header">
+        <h5 class="mb-0">Productos Seleccionados</h5>
       </div>
+      <div class="card-body">
+        <ul>
+          <li>
+            producto nuevo - Cantidad: 2
+          </li>
+        </ul>
+      </div>
+    </div>
 
-      <!-- Total Section -->
-      <div class="card mb-4">
-        <div class="card-body">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <h5 class="mb-0">Total:</h5>
-              <small class="text-success">10% descuento aplicado!</small>
+    <!-- Total Section -->
+    <div class="card mb-4">
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-6 offset-md-6">
+            <div class="d-flex justify-content-between ">
+              <strong>Total</strong>
+              <span>{{ total | currency: 'ARS': 'symbol' : '1.2-2' }}</span>
             </div>
-            <h5>${{calculateTotal() | number:'1.2-2'}}</h5>
+            @if(hasDiscount){
+            <div class="text-success mt-2">
+              10% de descuento aplicado
+            </div>
+            }
+            <h5>{{calculateTotal()}}</h5>
+  
           </div>
         </div>
       </div>
+    </div>
 
-      <div class="text-end">
-        <button type="submit" class="btn btn-primary" [disabled]="!orderForm.valid">
-          Create Order
-        </button>
-      </div>
-    </form>
-  </div>
+    <div class="text-end">
+      <button type="submit" class="btn btn-primary" [disabled]="!orderForm.valid">
+        Create Order
+      </button>
+    </div>
+  </form>
+</div>
